@@ -4,6 +4,8 @@ import numpy as np
 from scipy import signal
 from scipy import linalg
 import control
+from numpy import linalg as LA
+from scipy.linalg import expm_cond
 
 # function [AT,BT,CT,DT,T0] = obsv_cst(A,B,C,D)
 def obsv_cst(A,B,C,D):
@@ -19,10 +21,16 @@ def obsv_cst(A,B,C,D):
   # print(e)
   # print('e.shape', e.shape)
 
+  print('LA.cond(A)  ', LA.cond(A))
+  print('expm_cond(A)', expm_cond(A))
+  
   # O = obsv(A,C);
   O = control.obsv(A, C)
   # print(O)
   # print('O.shape', O.shape)
+  
+  print('LA.cond(O)  ', LA.cond(O))
+  print('expm_cond(O)', expm_cond(O))
 
   # [U, S, V] = svd(O);
   [U, S, Vh] = linalg.svd(O)
