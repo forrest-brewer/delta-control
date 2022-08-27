@@ -90,6 +90,10 @@ beta = num_ts;
 alpha = den_ts;
 % bode(ss(A,B,C,D),tf(num_t,den_t));
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(alpha);
+disp(beta);
+disp(k);
 
 % Simulate Simulink Filter Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

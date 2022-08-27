@@ -90,6 +90,10 @@ beta = num_ts;
 alpha = den_ts;
 % bode(ss(A,B,C,D),tf(num_t,den_t));
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(alpha);
+disp(beta);
+disp(k);
 
 % Simulate Simulink Filter Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,6 +101,9 @@ sim_out = sim('filter_model');
 
 filter_output = sim_out.filter_output.signals.values;
 filter_state = sim_out.filter_state.signals.values;
+
+disp(sim_out.filter_output.signals.dimensions)
+disp(sim_out.filter_state.signals.dimensions)
 
 % Plotting (Transfer Function Estimation)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
