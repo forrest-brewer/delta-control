@@ -1,5 +1,6 @@
 #
 import numpy as np
+from scipy import signal
 import matplotlib.pyplot as plt
 import os
 os.environ['DISPLAY'] = ':0'
@@ -28,35 +29,10 @@ file.close()
 w = ds.sinc_decimate(v, SincOrder, DecFact)
 
 # ----------------------------------------------------------
-N = max(w.shape)
-Nfft = min(N, 16*8192)
-n = np.arange((N - Nfft)/2, (N + Nfft)/2).astype(np.int32)
-W = np.fft.fft(w[n] * ds.ds_hann(Nfft)) / (Nfft / 4)
-inBin = np.round(SineFreq*Nfft)/FsOut
-plt.ylabel('dB')
-plt.semilogx(np.arange(Nfft)/Nfft*FsOut, ds.dbv(W), label='Output signal')
-f, Wp = ds.logsmooth(W, inBin)
-plt.semilogx(f*FsOut, Wp, '#556B2F', linewidth=2.5)
-plt.xlim([10, FsOut/2])
+f, Pxx_den = signal.periodogram(w, FsOut)
+plt.semilogy(f, Pxx_den)
+# plt.ylim([1e-7, 1e2])
+plt.xlim([10, 2000])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('PSD [V**2/Hz]')
 plt.show()
-
-# ----------------------------------------------------------
-n = np.arange(N)
-n = n.astype(np.int32)
-t = np.arange(max(n.shape))
-plt.plot(t, w[n], 'r')
-plt.ylabel('$w(t)$')
-plt.xlabel('Sample #')
-plt.axis([0, max(n)-min(n), -1.1, 1.1])
-plt.show()
-
-# ----------------------------------------------------------
-N = max(w.shape)
-U = np.fft.fft(w)/(N/4)
-f = np.linspace(0, FsOut, N + 1)
-f = f[:int(N/2 + 1)]
-plt.semilogx(f, ds.dbv(U[:int(N/2) + 1]))
-plt.xlabel('f [Hz]')
-plt.ylabel('U(f) [dB]')
-plt.show()
-
