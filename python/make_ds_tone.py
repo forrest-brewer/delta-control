@@ -16,10 +16,27 @@ fs = fb*2
 fs_to_ds = fs*OSR # sampling rate
 
 # ----------------------------------------------------------
-# t = np.arange(0, 0.125, 1.0/fs_to_ds)
+t = np.arange(0, 0.125, 1.0/fs_to_ds)
 
 # u_to_ds  = 0.4 * np.sin(2*np.pi*1000*t) * signal.windows.hann(t.shape[0])
 # u_to_ds  =  0.1 * np.sin(2*np.pi*1000*t)
+
+u_to_ds  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
+u_to_ds += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
+
+u_to_ds -= np.amin(u_to_ds)
+u_to_ds /= np.amax(u_to_ds)
+u_to_ds *= 1.8
+u_to_ds -= 0.9
+
+print('np.amin(u_to_ds)', np.amin(u_to_ds))
+print('np.amax(u_to_ds)', np.amax(u_to_ds))
 
 # u  = SineAmp*np.sin(2*np.pi*10/Fs*np.arange(N))*ds.ds_hann(N)
 # u += SineAmp*np.sin(2*np.pi*100/Fs*np.arange(N))*ds.ds_hann(N)
@@ -27,15 +44,15 @@ fs_to_ds = fs*OSR # sampling rate
 # u += SineAmp*np.sin(2*np.pi*5000/Fs*np.arange(N))*ds.ds_hann(N)
 # u0 = u_to_ds[::OSR]
 
-# ----------------------------------------------------------
-t  = np.arange(0, 2, 1.0/fs_to_ds)
-u  = np.random.rand(t.shape[0])
-u -= 0.5
-u *= 0.4
+# # ----------------------------------------------------------
+# t  = np.arange(0, 2, 1.0/fs_to_ds)
+# u  = np.random.rand(t.shape[0])
+# u -= 0.5
+# u *= 0.4
 
-# ----------------------------------------------------------
-sos = signal.butter(10, fb, 'lp', fs=fs_to_ds, output='sos')
-u_to_ds = signal.sosfilt(sos, u)
+# # ----------------------------------------------------------
+# sos = signal.butter(10, fb, 'lp', fs=fs_to_ds, output='sos')
+# u_to_ds = signal.sosfilt(sos, u)
 
 
 # plt.plot(np.arange(N)[::DecFact]/Fs, u0)
@@ -68,7 +85,8 @@ plt.ylabel('PSD [V**2/Hz]')
 plt.show()
 
 # ----------------------------------------------------------
-H = ds.synthesizeNTF(5, OSR, 1)
+# H = ds.synthesizeNTF(5, OSR, 1)
+H = ds.synthesizeNTF(2, OSR, 1)
 v = ds.simulateDSM(u_to_ds, H)[0]
 
 # ----------------------------------------------------------
