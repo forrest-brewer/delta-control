@@ -31,39 +31,32 @@ fs_to_ds = fs*OSR # sampling rate
   # return data_out
 
 # ----------------------------------------------------------
-t = np.arange(0, 0.25, 1.0/fs_to_ds)
+t = np.arange(0, 2.5, 1.0/fs_to_ds)
 
-u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
-u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
+u = 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+
+# u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
+# u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
 
 u -= np.amin(u)
 u /= np.amax(u)
 u *= 2
 u -= 1
-# u *= 0.1
+u *= 0.5
 
 print('np.amin(u)', np.amin(u))
 print('np.amax(u)', np.amax(u))
 
 # ----------------------------------------------------------
-t = np.linspace(0, 1.0/fs_to_ds, num=u.shape[0], endpoint=False)
-
-plt.plot(t, u)
-plt.show()
-
-# ----------------------------------------------------------
 f, Pxx_den_from_u = signal.welch(u[::OSR], fs, nperseg=1024*8)
-plt.semilogy(f, Pxx_den_from_u)
-# plt.ylim([0.5e-3, 1])
-plt.axvline(1000, color='green')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('PSD [V**2/Hz]')
+plt.plot(f, Pxx_den_from_u)
+plt.loglog()
 plt.title('u[::OSR]')
 plt.show()
 
@@ -97,39 +90,16 @@ v = np.zeros(u.shape[0])
 for idx, x in enumerate(u):
   v[idx] = ds_mod.dsigma(x)
 
-#----------------------------------------------------------
-sos = signal.butter(10, fb, 'lp', fs=fs_to_ds, output='sos')
-ds_out = signal.sosfilt(sos, v)
-ds_out = ds_out[::OSR]
-
 # ----------------------------------------------------------
-t = np.linspace(0, 1.0/fs_to_ds, num=ds_out.shape[0], endpoint=False)
-
-plt.plot(t, ds_out)
-plt.show()
-
-# ----------------------------------------------------------
-f, Pxx_den_from_filter = signal.welch(ds_out, fs, nperseg=1024*8)
-plt.semilogy(f, Pxx_den_from_filter)
-# plt.ylim([0.5e-3, 1])
-plt.axvline(1000, color='green')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('PSD [V**2/Hz]')
-plt.title('ds_mod after LP filter and down sample')
+Pxx_den_from_filter, f = plt.psd(v, 1024*8, fs_to_ds)
+plt.plot(f, Pxx_den_from_filter)
+plt.loglog()
+plt.title('5kHz sine wave @ DS modulator output')
 plt.show()
 
 # # ----------------------------------------------------------
-# plt.semilogy(f, Pxx_den_from_filter / Pxx_den_from_u)
-# # plt.ylim([0.5e-3, 1])
-# plt.axvline(1000, color='green')
-# plt.xlabel('frequency [Hz]')
-# plt.ylabel('PSD [V**2/Hz]')
-# plt.title('y / x')
-# plt.show()
-
-# ----------------------------------------------------------
-file = open('ds_tones.pickle', 'wb')
-pickle.dump(v, file)
-file.close()
-print('DeltaSigma tones done!')
+# file = open('ds_tones.pickle', 'wb')
+# pickle.dump(v, file)
+# file.close()
+# print('DeltaSigma tones done!')
 
