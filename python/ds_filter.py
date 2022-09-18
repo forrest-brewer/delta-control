@@ -8,31 +8,22 @@ import deltasigma as ds
 import pickle
 
 # ----------------------------------------------------------
-# https://dsp.stackexchange.com/questions/11471/how-would-sigma-delta-modulation-work-in-software
 class sigma_delta():
   # ----------------------------------------------------------
   def __init__(self):
-    self.sum1 = 0
-    self.sum2 = 0
-    self.width = 2
-    self.bound = 2**(self.width-1)
+    self.x1 = 0
+    self.x2 = 0
 
-  def dsigma(self, y):
-    # compute next state (clock update)
-    sum1d = self.sum1
-    sum2d = self.sum2
+  def dsigma(self, u):
+    next_x1 = self.x1 + self.x2 + u - 2*np.sign(self.x1)
+    next_x2 = self.x2 + u - np.sign(self.x1)
+    # The register closest to the output holds state x1 in this case.
+    # The output can be written as
+    data_out = np.sign(self.x1)
+    self.x1 = next_x1
+    self.x2 = next_x2
 
-    # asynchronous operations
-    out = -1.0 if sum2d < 0 else 1.0
-    # fb = -1 * self.bound if sum2d < 0 else self.bound - 1
-    fb = -0.1 if sum2d < 0 else 0.1
-    fbx2 = 2*fb
-    delta1 = y - fb
-    delta2 = sum1d - fbx2
-
-    self.sum1 = sum1d + delta1
-    self.sum2 = sum2d + delta2
-    return out
+    return data_out
 
 
 # ----------------------------------------------------------
@@ -59,6 +50,9 @@ file  = open('ds_tones.pickle', 'rb')
 # file  = open('ds_tones_wn.pickle', 'rb')
 ds_in = pickle.load(file)
 file.close()
+
+print('np.amin(ds_in)', np.amin(ds_in))
+print('np.amax(ds_in)', np.amax(ds_in))
 
 # ----------------------------------------------------------
 ds_mod = sigma_delta()
@@ -149,18 +143,18 @@ plt.ylabel('PSD [V**2/Hz]')
 plt.title('y')
 plt.show()
 
-# ----------------------------------------------------------
-tf_est = Pxx_den_to_filter/Pxx_den_from_filter
-tf_est /= np.amax(tf_est)
+# # ----------------------------------------------------------
+# tf_est = Pxx_den_to_filter/Pxx_den_from_filter
+# tf_est /= np.amax(tf_est)
 
-# plt.semilogy(f[:2000], tf_est[:2000])
-plt.semilogy(f, tf_est)
-# plt.semilogy(f, Pxx_den_from_filter/Pxx_den_to_filter)
-# plt.ylim([0.5e-3, 1])
-plt.axvline(300, color='green')
-plt.axvline(3000, color='green')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('PSD [V**2/Hz]')
-plt.title('y / x')
-plt.show()
+# # plt.semilogy(f[:2000], tf_est[:2000])
+# plt.semilogy(f, tf_est)
+# # plt.semilogy(f, Pxx_den_from_filter/Pxx_den_to_filter)
+# # plt.ylim([0.5e-3, 1])
+# plt.axvline(300, color='green')
+# plt.axvline(3000, color='green')
+# plt.xlabel('frequency [Hz]')
+# plt.ylabel('PSD [V**2/Hz]')
+# plt.title('y / x')
+# plt.show()
 
