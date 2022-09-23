@@ -64,10 +64,10 @@ def psd_plot(x, Fs):
   # return data_out
 
 # ----------------------------------------------------------
-# t = np.arange(0, 0.25, 1.0/fs_to_ds)
-t = np.arange(0, 2.5, 1.0/fs_to_ds)
+t = np.arange(0, 0.25, 1.0/fs_to_ds)
+# t = np.arange(0, 2.5, 1.0/fs_to_ds)
 
-u = 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+u = 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
 
 # u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
 # u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
@@ -134,9 +134,9 @@ for idx, x in enumerate(u):
 # ----------------------------------------------------------
 psd_plot(v, fs_to_ds)
 
-# # ----------------------------------------------------------
-# file = open('ds_tones.pickle', 'wb')
-# pickle.dump(v, file)
-# file.close()
-# print('DeltaSigma tones done!')
+# ----------------------------------------------------------
+file = open('ds_tones.pickle', 'wb')
+pickle.dump(v, file)
+file.close()
+print('DeltaSigma tones done!')
 

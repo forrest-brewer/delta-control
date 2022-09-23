@@ -2,10 +2,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-import os
-os.environ['DISPLAY'] = ':0'
-import deltasigma as ds
+from scipy.fft import fft, fftfreq
 import pickle
+
+# ----------------------------------------------------------
+def psd_plot(x, Fs):
+    N = x.shape[0]
+    xdft = fft(x)
+    xdft = xdft[0: int(N/2)]
+    psdx = (1/(Fs*N)) * np.abs(xdft)**2
+    psdx[1:-2] = 2*psdx[1:-2]
+    freq = np.arange(0, Fs/2, Fs/N)
+
+    plt.semilogx(freq, 10*np.log10(psdx))
+    plt.grid(True)
+    plt.title('PSD')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Power/Frequency (dB/Hz)')
+    plt.show()
+
+    return psdx, freq
 
 # ----------------------------------------------------------
 class sigma_delta():
@@ -24,7 +40,6 @@ class sigma_delta():
     self.x2 = next_x2
 
     return data_out
-
 
 # ----------------------------------------------------------
 OSR = 256
@@ -45,8 +60,8 @@ beta  = delta_sigma_cof['beta' ][0]
 k     = delta_sigma_cof['k'    ][0]
 
 # ----------------------------------------------------------
-file  = open('ds_tones.pickle', 'rb')
-# file  = open('ds_tone_1k.pickle', 'rb')
+# file  = open('ds_tones.pickle', 'rb')
+file  = open('ds_tone_1k.pickle', 'rb')
 # file  = open('ds_tones_wn.pickle', 'rb')
 ds_in = pickle.load(file)
 file.close()
@@ -60,14 +75,6 @@ ds_mod = sigma_delta()
 def do_filter(x, state):
   next_state = np.zeros(4)
 
-  # y  =  beta[0] * x
-  # y += state[0] * k[0] * ts
-
-  # if y > 0:
-    # y = 1.0
-  # else:
-    # y = -1.0
-    
   y_filter  =  beta[0] * x
   y_filter += state[0] * k[0] * ts
   y = ds_mod.dsigma(y_filter)
@@ -103,10 +110,6 @@ for idx, x in enumerate(ds_in):
 plt.plot(np.arange(50), v[-50:])
 plt.show()
 
-# # ----------------------------------------------------------
-# # ds_out = ds.sinc_decimate(v, 6, OSR)
-# ds_out = ds.sinc_decimate(v, 2, OSR)
-
 #----------------------------------------------------------
 sos = signal.butter(10, fb, 'lp', fs=fs_to_ds, output='sos')
 ds_out = signal.sosfilt(sos, v)
@@ -114,47 +117,11 @@ ds_out = ds_out[::OSR]
 
 # ----------------------------------------------------------
 t = np.linspace(0, 1.0/fs_to_ds, num=ds_out.shape[0], endpoint=False)
-
 plt.plot(t, ds_out)
+plt.plot(t[200:350], ds_out[200:350])
 plt.show()
 
 # ----------------------------------------------------------
-f, Pxx_den_from_filter = signal.welch(ds_out, fs, nperseg=1024*8)
-plt.semilogy(f, Pxx_den_from_filter)
-# plt.ylim([0.5e-3, 1])
-plt.axvline(1000, color='green')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('PSD [V**2/Hz]')
-plt.title('x')
-plt.show()
-
-# ----------------------------------------------------------
-# ----------------------------------------------------------
-# filter_in = ds.sinc_decimate(ds_in, 6, OSR)
-filter_in = ds.sinc_decimate(ds_in, 2, OSR)
-
-# ----------------------------------------------------------
-f, Pxx_den_to_filter = signal.welch(filter_in, fs, nperseg=1024*8)
-plt.semilogy(f, Pxx_den_to_filter)
-# plt.ylim([0.5e-3, 1])
-plt.axvline(1000, color='green')
-plt.xlabel('frequency [Hz]')
-plt.ylabel('PSD [V**2/Hz]')
-plt.title('y')
-plt.show()
-
-# # ----------------------------------------------------------
-# tf_est = Pxx_den_to_filter/Pxx_den_from_filter
-# tf_est /= np.amax(tf_est)
-
-# # plt.semilogy(f[:2000], tf_est[:2000])
-# plt.semilogy(f, tf_est)
-# # plt.semilogy(f, Pxx_den_from_filter/Pxx_den_to_filter)
-# # plt.ylim([0.5e-3, 1])
-# plt.axvline(300, color='green')
-# plt.axvline(3000, color='green')
-# plt.xlabel('frequency [Hz]')
-# plt.ylabel('PSD [V**2/Hz]')
-# plt.title('y / x')
-# plt.show()
+psd_plot(ds_in, fs_to_ds)
+psd_plot(v, fs_to_ds)
 
