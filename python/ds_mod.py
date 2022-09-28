@@ -67,17 +67,23 @@ def psd_plot(x, Fs):
 t = np.arange(0, 0.25, 1.0/fs_to_ds)
 # t = np.arange(0, 2.5, 1.0/fs_to_ds)
 
-u = 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
+# u = 1.0 * np.sin(2*np.pi* 10000 * t) * signal.windows.hann(t.shape[0])
 
-# u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
+u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
 
+# #----------------------------------------------------------
+# u = np.random.rand(t.shape[0])
+# sos = signal.butter(10, fb, 'lp', fs=fs_to_ds, output='sos')
+# u = signal.sosfilt(sos, u)
+
+#----------------------------------------------------------
 u -= np.amin(u)
 u /= np.amax(u)
 u *= 2
@@ -88,10 +94,11 @@ print('np.amin(u)', np.amin(u))
 print('np.amax(u)', np.amax(u))
 
 # ----------------------------------------------------------
-f, Pxx_den_from_u = signal.welch(u[::OSR], fs, nperseg=1024*8)
+# f, Pxx_den_from_u = signal.welch(u[::OSR], fs, nperseg=1024*8)
+f, Pxx_den_from_u = signal.welch(u, fs_to_ds, nperseg=1024*8)
 plt.plot(f, Pxx_den_from_u)
 plt.loglog()
-plt.title('u[::OSR]')
+# plt.title('u[::OSR]')
 plt.show()
 
 # # ----------------------------------------------------------
