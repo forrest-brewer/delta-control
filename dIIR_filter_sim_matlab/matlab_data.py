@@ -4,7 +4,7 @@ import scipy.io as sio
 import pickle
 
 # ----------------------------------------------------------
-file_name = './lp_filter_2k/all.mat'
+file_name = './cheby2_bandpass/all.mat'
 
 mat_data = sio.loadmat(file_name)
 # print(mat_data)

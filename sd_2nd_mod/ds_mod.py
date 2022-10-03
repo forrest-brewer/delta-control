@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.fft import fft, fftfreq
-from scipy.signal import chirp
 import pickle
 
 # ----------------------------------------------------------
@@ -65,23 +64,19 @@ def psd_plot(x, Fs):
   # return data_out
 
 # ----------------------------------------------------------
-# t = np.arange(0, 0.25, 1.0/fs_to_ds)
-# # t = np.arange(0, 2.5, 1.0/fs_to_ds)
+t = np.arange(0, 0.25, 1.0/fs_to_ds)
+# t = np.arange(0, 2.5, 1.0/fs_to_ds)
 
-# # u = 1.0 * np.sin(2*np.pi* 10000 * t) * signal.windows.hann(t.shape[0])
+# u = 1.0 * np.sin(2*np.pi* 10000 * t) * signal.windows.hann(t.shape[0])
 
-# u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
-# u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
-
-t = np.arange(0, 0.5, 1.0/fs_to_ds)
-u = 0.5*chirp(t,0,0.25,fb/2);
-
+u  = 1.0 * np.sin(2*np.pi*  100 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*  500 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 1000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 2500 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi* 5000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*10000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*15000 * t) * signal.windows.hann(t.shape[0])
+u += 1.0 * np.sin(2*np.pi*20000 * t) * signal.windows.hann(t.shape[0])
 
 # #----------------------------------------------------------
 # u = np.random.rand(t.shape[0])
@@ -147,7 +142,7 @@ for idx, x in enumerate(u):
 psd_plot(v, fs_to_ds)
 
 # ----------------------------------------------------------
-file = open('u.pickle', 'wb')
+file = open('ds_tones.pickle', 'wb')
 pickle.dump(v, file)
 file.close()
 print('DeltaSigma tones done!')

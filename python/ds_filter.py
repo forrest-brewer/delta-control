@@ -50,7 +50,8 @@ ts = 1/fs_to_ds   # sampling period
 
 # ----------------------------------------------------------
 # file = open('delta_sigma_cof.pickle', 'rb')
-file = open('lp_filter_2k_cof.pickle', 'rb')
+# file = open('lp_filter_2k_cof.pickle', 'rb')
+file = open('cheby2_bandpass.pickle', 'rb')
 delta_sigma_cof = pickle.load(file)
 file.close()
 
@@ -64,7 +65,8 @@ k     = delta_sigma_cof['k'    ][0]
 # file  = open('ds_tones.pickle', 'rb')
 # file  = open('ds_tone_1k.pickle', 'rb')
 # file  = open('ds_tone_10k.pickle', 'rb')
-file  = open('ds_tones_wn.pickle', 'rb')
+# file  = open('ds_tones_wn.pickle', 'rb')
+file  = open('ds_chirp.pickle', 'rb')
 ds_in = pickle.load(file)
 file.close()
 
