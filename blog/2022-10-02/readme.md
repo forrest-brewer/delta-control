@@ -1,6 +1,6 @@
 # Simulink Code
 ## $\Sigma\Delta$ 2nd Order Modulator
-A 2nd order $\Sigma\Delta$ modulator was created with simulink. Joseph's diagram was drawn in simulink. Please see [sd_2nd_mod_top.m](../../sd_2nd_mod/sd_2nd_mod_top.m).
+A 2nd order $\Sigma\Delta$ modulator was created with simulink. Joseph's diagram was drawn in simulink. Please see [sd_2nd_mod_top.m](https://github.com/forrest-brewer/delta-control/blob/main/sd_2nd_mod/sd_filter_top.m).
 
 ![](sd_2nd_mod.png)
 
@@ -10,7 +10,7 @@ A chirp from 0Hz to 22050Hz (Nyquist) was inputted and then the PSD was plotted.
 
 ## $\Sigma\Delta$ Filter with Modulator
 
-The $\Sigma\Delta$ modulator was added to Joseph's simulink filter drawing. The simulink model now matches the drawing below. Please see [sd_filter_top.m](../../sd_2nd_mod/sd_filter_top.m).
+The $\Sigma\Delta$ modulator was added to Joseph's simulink filter drawing. The simulink model now matches the drawing below. Please see [sd_filter_top.m](https://github.com/forrest-brewer/delta-control/blob/main/sd_2nd_mod/sd_filter_top.m).
 
 ![](SD_Filter_Architecture.PNG)
 
@@ -26,7 +26,7 @@ Here is PSD of the notch filter (300Hz to 3kHz) with a chirp inputted. Looks goo
 
 # Python Code
 ## $\Sigma\Delta$ 2nd Order Modulator
-The behavioral code for the [$\Sigma\Delta$ modulator](../../python/ds_mod.py) was simulated with a chirp. The PSD looks the same as the simulink's PSD.
+The behavioral code for the [$\Sigma\Delta$ modulator](https://github.com/forrest-brewer/delta-control/blob/main/python/ds_mod.py) was simulated with a chirp. The PSD looks the same as the simulink's PSD.
 
 ![](py_psd_sd_mod.png)
 
