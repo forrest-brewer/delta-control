@@ -11,7 +11,7 @@
 
 ## Joesph's Mcode
 
-[SD_Filter_Design](https://github.com/forrest-brewer/delta-control/SD_Filter_Design)
+[SD_Filter_Design](https://github.com/forrest-brewer/delta-control/tree/main/SD_Filter_Design)
 
 ### Bode plot for bandpass filter
 ![Bode](bode.png)
