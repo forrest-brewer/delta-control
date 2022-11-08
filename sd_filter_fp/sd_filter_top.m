@@ -2,7 +2,7 @@ clear
 close all
 clc
 
-addpath('..\dIIR_filter_sim_matlab')
+addpath('..\SD_Filter_Design')
 
 % Filter Specifications
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,10 +67,10 @@ C = C*T;
 % Scaling
 [Ts, k] = dIIR_scaling(Ad,Bd,T0,f,ts);
 K_inv = diag(k);
-Ad_ts = Ts\Ad_t*Ts;
-Bd_ts = Ts\Bd_t;
-Cd_ts = Cd_t*Ts;
-Dd_ts = Dd_t;
+% Ad_ts = Ts\Ad_t*Ts;
+% Bd_ts = Ts\Bd_t;
+% Cd_ts = Cd_t*Ts;
+% Dd_ts = Dd_t;
 num_ts = [num_t(1) num_t(2:end)./(diag(Ts)')];
 den_ts = [1 den_t(2:end)./(diag(Ts)')];
 

@@ -44,6 +44,9 @@ sig_2_nom = trapz(f,squeeze(sig_2_sd1),1) + trapz(f,squeeze(sig_2_sd2),1);
 % total SD integrator noise
 sig_2_x_sd = sig_2_x_sd1 + sig_2_x_sd2;
 
+
+save('dDFIIt_noise_gain.mat','Ad','Bd','Cd','Dd','K_inv','Ts','T0','f','ts')
+
 end
 
 

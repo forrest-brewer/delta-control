@@ -16,4 +16,6 @@ S_asys = [0; S_alpha];
 S_mag = squeeze(S_bmag + S_amag);
 S_phz = squeeze(S_bphz + S_aphz);
 
+save('SD_dIIR_sensitivity.mat', 'A', 'B', 'C', 'D', 'T0', 'Ts', 'f', 'ts', 'S_bmag', 'S_amag', 'S_mag', 'S_phz')
+
 end
