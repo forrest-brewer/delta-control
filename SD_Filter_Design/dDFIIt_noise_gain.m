@@ -5,6 +5,7 @@ n_sd = ts/3;
 NTF_num = [ts^2 0 0];
 NTF_den = [ts^2 2*ts 1];
 NTF = ss(tf(NTF_num,NTF_den));
+[NTF_bode,~] = delta_bode(NTF.a,NTF.b,NTF.c,NTF.d,f,ts);
 
 % noise gain due to input sigma delta
 H_sd = ss(Ad,Bd,Cd,Dd);
@@ -45,7 +46,7 @@ sig_2_nom = trapz(f,squeeze(sig_2_sd1),1) + trapz(f,squeeze(sig_2_sd2),1);
 sig_2_x_sd = sig_2_x_sd1 + sig_2_x_sd2;
 
 
-save('dDFIIt_noise_gain.mat','Ad','Bd','Cd','Dd','K_inv','Ts','T0','f','ts')
+save('dDFIIt_noise_gain.mat','Ad','Bd','Cd','Dd','K_inv','Ts','T0','f','ts', 'NTF_bode', 'sig_2_sd1', 'sig_2_sd2', 'm1', 'H', 'm_sys_x_sd1', 'sig_2_x_sd2', 'sig_2_x_sd')
 
 end
 
