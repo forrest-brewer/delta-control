@@ -103,8 +103,8 @@ p = .1*ones(1,length(S_mag));
 s = sqrt(trapz(sig_2_x_sd,2)*(12*OSR));
 q = bitwidth_opt(squeeze(S_mag),p,h1,sig_noise,s);
 
-figure;loglog(f,20*log10(q'*S_mag),f,20*log10(p),'r');
-10*log10(sqrt(2)/(q'*h1*q))
+% figure;loglog(f,20*log10(q'*S_mag),f,20*log10(p),'r');
+% 10*log10(sqrt(2)/(q'*h1*q))
 
 qs = log2(q);
 qs(qs>0) = 0;

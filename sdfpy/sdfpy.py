@@ -4,6 +4,7 @@ import numpy as np
 from scipy import signal
 from scipy import linalg
 import control
+import cvxpy as cp
 
 # ----------------------------------------------------------
 def c2delta(A,B,C,D,ts):
@@ -33,10 +34,12 @@ def obsv_cst(A,B,C,D):
   T0 = np.zeros((n,n))
 
   for i in range(1, n+1):
-    column = np.power(A, n-i) @ T1
+    column = np.linalg.matrix_power(A, n-i) @ T1
     T0[:, i-1] = column[:,0]
 
   AT = linalg.solve(T0, A @ T0)
+  AT[:-1,1:] = np.eye(n-1)
+  AT[-1,1:] = 0
   BT = linalg.solve(T0, B)
   CT = C @ T0;
   DT = D;
@@ -54,7 +57,13 @@ def delta_bode(A,B,C,D,f,ts):
 
   for i in range(f.shape[0]):
       A_d = delta[i] * np.eye(A.shape[0]) - A
-      h   = C @ linalg.solve(A_d, B) + D
+      
+      [A_d, T_d] = linalg.matrix_balance(A_d)
+      B_d = linalg.solve(T_d, B)
+      C_d = C @ T_d
+      
+      h   = linalg.solve(A_d, B_d)
+      h   = (C_d @ h) + D
       mag[:,:,i] = np.abs(h)
       phz[:,:,i] = 180*np.arctan2(np.imag(h),np.real(h))/np.pi
   return mag, phz
@@ -117,3 +126,96 @@ def SD_dIIR_sensitivity(A,B,C,D,T0,Ts,f,ts):
 
   return S_mag, S_phz
 
+# ----------------------------------------------------------
+# function [sig_2_nom, sig_2_x_sd, H] = dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts)
+def dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts):
+  # % Sigma Delta Specifications (2nd Order)
+  n_sd = ts/3
+  NTF_num = [ts**2, 0, 0]
+  NTF_den = [ts**2, 2*ts, 1]
+  NTF = control.tf(NTF_num, NTF_den)
+  # print(NTF)
+  NTF = control.ss(control.tf(NTF_num, NTF_den))
+
+  # % noise gain due to input sigma delta
+  H_sd = control.ss(Ad,Bd,Cd,Dd);
+  sys_sd1 = control.series(NTF, H_sd)
+  [g1,phz] = delta_bode(sys_sd1.A,sys_sd1.B,sys_sd1.C,sys_sd1.D,f,ts)
+  sig_2_sd1 = n_sd*(np.squeeze(g1)**2)
+
+  # % noise gain due to output sigma delta
+  A = linalg.solve(Ts, linalg.solve(T0, Ad))
+  z = np.zeros(Ad.shape[1])
+  z[0] = 1
+  B = linalg.solve(Ts, linalg.solve(T0, Ad-np.eye(Ad.shape[0])))
+  B = B @ T0 @ z.T
+  B = B.reshape((Ad.shape[0],1))
+  C = Cd @ T0 @ Ts
+  D = 1
+  E_sd = control.ss(A, B, C, D)
+  sys_sd2 = control.series(NTF, E_sd)
+  [g2,phz] = delta_bode(sys_sd2.A,sys_sd2.B,sys_sd2.C,sys_sd2.D,f,ts)
+  sig_2_sd2 = n_sd*(np.squeeze(g2)**2)
+
+  # %noise gain due to scaling coefficient multiplication roundoff
+  sys_g0 = E_sd.copy()
+  sys_g = control.ss(Ad.T,Cd.T,Ts.T @ T0.T, 0)
+  sys_g.C[-1,:] = 0
+  sys_g.D[-1,:] = 0
+  sys_k = ss_concat_outputs(sys_g0, sys_g)
+  [m1,phz] = delta_bode(sys_k.A,sys_k.B,sys_k.C,sys_k.D,f,ts)
+  H = np.diag(((2*ts)/3)*np.trapz(np.squeeze(m1**2),f))
+
+  # %noise gain from input sigma delta to integrators
+  C = linalg.solve(Ts, linalg.solve(T0, np.eye(Ad.shape[0])))
+  C = K_inv @ C
+  sys_x_sd1 = control.ss(Ad,Bd,C,0)
+  sys_x_sd1 = control.series(NTF, sys_x_sd1)
+  [m_sys_x_sd1,phz] = delta_bode(sys_x_sd1.A,sys_x_sd1.B,sys_x_sd1.C,sys_x_sd1.D,f,ts)
+  sig_2_x_sd1 = n_sd*(np.squeeze(m_sys_x_sd1)**2)
+
+  # %noise gain from output sigma delta to integrators
+  z = np.zeros(Ad.shape[1])
+  z[0] = 1
+  B = Ad @ T0 @ Ts @ z.T
+  B = B.reshape((Ad.shape[0],1))
+  C = linalg.solve(Ts, linalg.solve(T0, np.eye(Ad.shape[0])))
+  C = K_inv @ C
+  sys_x_sd2 = control.series(NTF, control.ss(Ad, B, C, 0))
+  [m_sys_x_sd2,phz] = delta_bode(sys_x_sd2.A,sys_x_sd2.B,sys_x_sd2.C,sys_x_sd2.D,f,ts)
+  sig_2_x_sd2 = n_sd*(np.squeeze(m_sys_x_sd2)**2)
+
+  # % total SD output noise 
+  sig_2_nom = np.trapz(np.squeeze(sig_2_sd1),f) + np.trapz(np.squeeze(sig_2_sd2),f)
+  sig_2_x_sd = sig_2_x_sd1 + sig_2_x_sd2
+
+  return sig_2_nom, sig_2_x_sd, H
+
+# ----------------------------------------------------------
+# function q = bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd)
+def bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd):
+  n = S.shape[0]
+  u = np.ones((n,1))
+  l = np.zeros((n,1))
+  f = np.ones(n)
+  f[0] = 3
+  sig2_x_sd = np.append(sig2_x_sd,0).reshape(5,1)
+
+  # Define and solve the CVXPY problem.
+  q = cp.Variable((n,1))
+  prob = cp.Problem( cp.Maximize(f @ q),
+                     [ cp.quad_form(q,H) <= sig2_sd
+                     , S.T @ q <= p.T
+                     , q >= sig2_x_sd
+                     ]
+                   )
+  prob.solve()
+
+  # # Print result.
+  # print("\nThe optimal value is", prob.value)
+  # print("A solution x is")
+  # print(q.value)
+  # print("A dual solution corresponding to the inequality constraints is")
+  # print(prob.constraints[0].dual_value)
+  
+  return q
