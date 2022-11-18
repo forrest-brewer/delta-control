@@ -7,6 +7,7 @@ from scipy import linalg
 import scipy.io as sio
 import matplotlib.pyplot as plt
 import pickle
+import sys
 
 # sys.path.insert(0,'../sdfpy')
 import sdfpy as sdf
@@ -84,6 +85,7 @@ q = sdf.bitwidth_opt(S_mag,p,h1,sig_noise,s)
 # --------------------------------------------------------------------------
 mdic = { 'beta'  : beta
        , 'alpha' : alpha
+       , 'k'     : k
        , 'q'     : q.value
        , 'label' : 'experiment'
        }

@@ -50,8 +50,8 @@ ts = 1/fs_to_ds   # sampling period
 
 # ----------------------------------------------------------
 # file = open('delta_sigma_cof.pickle', 'rb')
-# file = open('lp_filter_2k_cof.pickle', 'rb')
-file = open('cheby2_bandpass.pickle', 'rb')
+file = open('lp_filter_2k_cof.pickle', 'rb')
+# file = open('cheby2_bandpass.pickle', 'rb')
 delta_sigma_cof = pickle.load(file)
 file.close()
 
@@ -78,33 +78,12 @@ ds_mod = sigma_delta()
 
 def do_filter(x, state):
   next_state = np.zeros(4)
-
-  y_filter  =  beta[0] * x
-  y_filter += state[0] * k[0] * ts
-  y = ds_mod.dsigma(y_filter)
-
+  y_filter       =  beta[0] * x                + state[0] * k[0] * ts
+  y              = ds_mod.dsigma(y_filter)
   next_state[0]  =  beta[1] * x - alpha[1] * y + state[1] * k[1] * ts + state[0]
-  # next_state[0]  =  beta[1] * x
-  # next_state[0] -= alpha[1] * y
-  # next_state[0] += state[1] * k[1] * ts
-  # next_state[0] += state[0]
-
   next_state[1]  =  beta[2] * x - alpha[2] * y + state[2] * k[2] * ts + state[1]
-  # next_state[1]  =  beta[2] * x
-  # next_state[1] -= alpha[2] * y
-  # next_state[1] += state[2] * k[2] * ts
-  # next_state[1] += state[1]
-
-  next_state[2]  =  beta[3] * x - alpha[3] * y + state[3] * k[3] * ts + state[1]
-  # next_state[2]  =  beta[3] * x
-  # next_state[2] -= alpha[3] * y
-  # next_state[2] += state[3] * k[3] * ts
-  # next_state[2] += state[1]
-
-  next_state[3]  =  beta[4] * x - alpha[4] * y + state[3]
-  # next_state[3]  =  beta[4] * x
-  # next_state[3] -= alpha[4] * y
-  # next_state[3] += state[3]
+  next_state[2]  =  beta[3] * x - alpha[3] * y + state[3] * k[3] * ts + state[2]
+  next_state[3]  =  beta[4] * x - alpha[4] * y                        + state[3]
 
   return y, next_state
 

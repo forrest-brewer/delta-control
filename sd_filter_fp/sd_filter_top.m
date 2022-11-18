@@ -141,8 +141,8 @@ for i = 1:length(alpha)
   bitwidths(i).k_ts  = fi(k_ts(i) , 1, shift(i) + 1, shift(i) );
 end
 
-sd_mod_amp = 1
-sd_mod_amp = fi(sd_mod_amp, 1, 16, 7)
+sd_mod_amp = 1;
+sd_mod_amp = fi(sd_mod_amp, 1, 16, 7);
 
 % Simulate Simulink Filter Model
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

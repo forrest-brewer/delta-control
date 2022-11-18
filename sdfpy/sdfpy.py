@@ -9,8 +9,9 @@ import cvxpy as cp
 # ----------------------------------------------------------
 def c2delta(A,B,C,D,ts):
   Ad = (linalg.expm(A*ts) - np.eye(A.shape[0])) / ts
-  Bd = np.matmul((linalg.expm(A*ts) - np.eye(A.shape[0]) ), B) / ts
-  Bd = np.matmul(np.linalg.inv(A), Bd)
+  # Bd = np.matmul((linalg.expm(A*ts) - np.eye(A.shape[0]) ), B) / ts
+  Bd = ((linalg.expm(A*ts) - np.eye(A.shape[0]) ) @ B) / ts
+  Bd = np.linalg.inv(A) @ Bd
   Cd = C;
   Dd = D;
   return Ad,Bd,Cd,Dd
@@ -30,7 +31,6 @@ def obsv_cst(A,B,C,D):
 
   T1 = T_inv @ e;
   n  = A.shape[1]
-  q  = T1.shape[1]
   T0 = np.zeros((n,n))
 
   for i in range(1, n+1):
@@ -69,16 +69,16 @@ def delta_bode(A,B,C,D,f,ts):
   return mag, phz
 
 # ----------------------------------------------------------
-def dIIR_scaling(A,B,T0,f,ts):
+def dIIR_scaling(Ad,Bd,T0,f,ts):
   T0_inv = linalg.solve(T0, np.eye(T0.shape[0]))
-  [f_int, phz] = delta_bode(A,B,T0_inv,0,f,ts)
+  [f_i, phz] = delta_bode(Ad,Bd,T0_inv,0,f,ts)
 
-  f_norm = np.zeros(A.shape[0])
+  f_norm = np.zeros(Ad.shape[0])
 
   for i in range(f_norm.shape[0]):
-    f_norm[i] = linalg.norm(f_int[i], np.inf, axis=1)
+    f_norm[i] = linalg.norm(f_i[i], np.inf, axis=1)
 
-  Ts = np.zeros(A.shape)
+  Ts = np.zeros(Ad.shape)
   k = np.zeros(f_norm.shape[0])
   k_inv = np.zeros(f_norm.shape[0])
 
@@ -102,18 +102,18 @@ def ss_concat_outputs(sys_0, sys_1):
   return control.ss(A,B,C,D)
 
 # ----------------------------------------------------------
-def SD_dIIR_sensitivity(A,B,C,D,T0,Ts,f,ts):
+def SD_dIIR_sensitivity(Ad,Bd,Cd,Dd,T0,Ts,f,ts):
   # %Sensitivity due to feedthrough coefficient
-  B_beta = np.zeros((1, A.shape[1])).T
+  B_beta = np.zeros((1, Ad.shape[1])).T
   B_beta[0][0] = 1
-  B_beta = A @ T0 @ B_beta
-  S_beta0 = control.ss(A,B_beta,C,1)
+  B_beta = Ad @ T0 @ B_beta
+  S_beta0 = control.ss(Ad,B_beta,Cd,1)
 
   # %Sensitivity due to numerator coefficients
-  S_beta = control.ss(A.T,C.T,Ts.T @ T0.T,0)
+  S_beta = control.ss(Ad.T,Cd.T,Ts.T @ T0.T,0)
 
   # %Sensitivity due to denominator coefficients
-  H = control.ss(A,B,C,D)
+  H = control.ss(Ad,Bd,Cd,Dd)
   S_alpha = control.series(H, S_beta)
   S_bsys = ss_concat_outputs(S_beta0, S_beta)
   null_sys = control.ss(0, 0, 0, 0)
