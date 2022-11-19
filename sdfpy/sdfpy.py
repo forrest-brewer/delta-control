@@ -127,7 +127,6 @@ def SD_dIIR_sensitivity(Ad,Bd,Cd,Dd,T0,Ts,f,ts):
   return S_mag, S_phz
 
 # ----------------------------------------------------------
-# function [sig_2_nom, sig_2_x_sd, H] = dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts)
 def dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts):
   # % Sigma Delta Specifications (2nd Order)
   n_sd = ts/3
@@ -192,14 +191,13 @@ def dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts):
   return sig_2_nom, sig_2_x_sd, H
 
 # ----------------------------------------------------------
-# function q = bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd)
 def bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd):
   n = S.shape[0]
   u = np.ones((n,1))
   l = np.zeros((n,1))
   f = np.ones(n)
   f[0] = 3
-  sig2_x_sd = np.append(sig2_x_sd,0).reshape(5,1)
+  sig2_x_sd = np.append(sig2_x_sd, 0).reshape(sig2_x_sd.shape[0] + 1, 1)
 
   # Define and solve the CVXPY problem.
   q = cp.Variable((n,1))
@@ -219,3 +217,101 @@ def bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd):
   # print(prob.constraints[0].dual_value)
   
   return q
+
+# ----------------------------------------------------------
+class sd_filter:
+  def __init__(self, OSR, fb):
+    self.OSR = OSR           # oversample ratio
+    self.fb  = fb            # nyquist
+    self.fs  = OSR*2*self.fb # sampling frequency
+    self.ts  = 1/self.fs     # sampling period
+
+  def run(self, A, B, C, D):
+    OSR = self.OSR
+    fb  = self.fb 
+    fs  = self.fs 
+    ts  = self.ts 
+  
+    # ----------------------------------------------------------
+    f  = np.logspace(0,np.log10(fb),2**10)
+
+    # ----------------------------------------------------------
+    [A, T] = linalg.matrix_balance(A)
+    B = linalg.solve(T, B) 
+    C = C @ T
+
+    # ----------------------------------------------------------
+    # Converting from Continuous Time to Sampled Time
+    [Ad,Bd,Cd,Dd] = c2delta(A,B,C,D,ts)
+
+    # ----------------------------------------------------------
+    # Structural Transformation of Filter
+    [Ad_t,Bd_t,Cd_t,Dd_t,T0] = obsv_cst(Ad,Bd,Cd,Dd)
+    [num_t, den_t] = signal.ss2tf(Ad_t,Bd_t,Cd_t,Dd_t)
+
+    # ----------------------------------------------------------
+    # Scaling
+    [Ts, k] = dIIR_scaling(Ad,Bd,T0,f,ts)
+    self.k = k
+
+    K_inv = np.diag(k);
+    num_ts = num_t.copy()
+    num_ts[0,1:] /= np.diag(Ts).T
+    den_ts = den_t.copy()
+    den_ts[1:] /= np.diag(Ts).T
+    den_ts[0] = 1
+
+    beta  = num_ts[0]
+    alpha = den_ts
+    self.beta  = beta 
+    self.alpha = alpha
+
+    # ----------------------------------------------------------
+    # % Calculation of sensitivity matrix
+    [S_mag, S_phz] = SD_dIIR_sensitivity(Ad,Bd,Cd,Dd,T0,Ts,f,ts)
+
+    # % Calculation of quantization noise
+    [sig_nom, sig_2_x_sd, h1] = dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts)
+
+    SNR = 90
+    sig_noise = 10**(-(SNR/10))
+    p = .1*np.ones((1,S_mag.shape[1]))
+    s = np.sqrt(np.trapz(sig_2_x_sd)*(12*OSR));
+    S_mag = np.squeeze(S_mag)
+
+    S = S_mag
+    H = h1
+    sig2_sd = sig_noise
+    sig2_x_sd = s
+
+    q = bitwidth_opt(S_mag,p,h1,sig_noise,s)
+    self.q = q
+
+    # ----------------------------------------------------------
+    qs = np.log2(q.value)
+    qs[qs>0] = 0
+    qs = np.ceil(np.abs(qs)).T
+    bi = np.ceil(np.log2(np.maximum(np.abs(alpha),np.abs(beta)))) + 1
+    bw = bi + qs + 1
+    b_frac = qs
+
+    # ----------------------------------------------------------
+    # # % Simulink Model Bitwidth Parameters
+    shift = np.round(np.abs(np.log2(ts*k)))
+    bw_accum = 1 + np.ceil(np.abs(np.log2(ts))) + b_frac
+    print('q = \n', np.log2(q.value.T))
+    print('Coefficient bitwidths = \n', bw)
+
+
+    # # % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    k_ts = k * ts
+    k_ts = np.append(k_ts, 0)
+    shift = np.append(shift, 1)
+
+    for idx, val in enumerate(alpha):
+      print('accum[', idx, '] |' , bw_accum[0,idx] , b_frac[0,idx])
+      print('alpha[', idx, '] |' , bw[0,idx]       , qs[0,idx]    )
+      print('beta [', idx, '] |' , bw[0,idx]       , qs[0,idx]    )
+      print('k_ts [', idx, '] |' , shift[idx] + 1  , shift[idx]   )
+      print('-' * 40)
+      

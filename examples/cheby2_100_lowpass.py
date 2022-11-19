@@ -1,5 +1,5 @@
 #
-# Filter example - cheby2 bandpass
+# Filter example - cheby2 low pass
 #
 import numpy as np
 from scipy import signal
@@ -19,14 +19,16 @@ fs  = OSR*2*fb # sampling frequency
 ts  = 1/fs     # sampling period
 
 # ----------------------------------------------------------
-# Bandpass Filter - 300Hz to 3kHz
-Rs = 60
-Wn = 2*np.pi*np.array([300, 3000])
-ftype = 'bandpass'
-N = 4
+# lowpass filter - 1kHz
+Rs    = 60
+Wn    = 2*np.pi*100
+ftype = 'lowpass'
+N     = 4
 
-[z,p,k]   = signal.cheby2(N/2,Rs,Wn,ftype, analog=True, output='zpk')
-[A,B,C,D] = signal.zpk2ss(z,p,k)
+[z,p,k]   = signal.cheby2(N, Rs, Wn, ftype, analog=True, output='zpk')
+[A,B,C,D] = signal.zpk2ss(z, p, k)
+
+print(A.shape, B.shape, C.shape, D.shape)
 
 filter = sdf.sd_filter(OSR,fb)
 filter.run(A,B,C,D)
@@ -40,4 +42,4 @@ mdic = { 'beta'  : filter.beta
        , 'k'     : filter.k
        , 'q'     : filter.q.value
        }
-sio.savemat("./cheby2_bandpass.mat", mdic)
+sio.savemat("./cheby2_100_lowpass.mat", mdic)
