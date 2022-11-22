@@ -271,7 +271,7 @@ class sd_filter:
     [S_mag, S_phz] = SD_dIIR_sensitivity(Ad,Bd,Cd,Dd,T0,Ts,f,ts)
 
     # % Calculation of quantization noise
-    [sig_nom, sig_2_x_sd, h1] = dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts)
+    [sig_nom, sig_2_x_sd, H] = dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts)
 
     SNR = 90
     sig_noise = 10**(-(SNR/10))
@@ -279,12 +279,7 @@ class sd_filter:
     s = np.sqrt(np.trapz(sig_2_x_sd)*(12*OSR));
     S_mag = np.squeeze(S_mag)
 
-    S = S_mag
-    H = h1
-    sig2_sd = sig_noise
-    sig2_x_sd = s
-
-    q = bitwidth_opt(S_mag,p,h1,sig_noise,s)
+    q = bitwidth_opt(S_mag,p,H,sig_noise,s)
     self.q = q
 
     # ----------------------------------------------------------
