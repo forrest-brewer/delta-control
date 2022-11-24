@@ -3,6 +3,7 @@ from scipy import signal
 from scipy import linalg
 import control
 import matplotlib.pyplot as plt
+from IPython.display import Image
 
 import sys
 
