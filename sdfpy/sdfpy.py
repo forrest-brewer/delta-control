@@ -3,6 +3,7 @@
 import numpy as np
 from scipy import signal
 from scipy import linalg
+import matplotlib.pyplot as plt
 import control
 import cvxpy as cp
 
@@ -57,11 +58,11 @@ def delta_bode(A,B,C,D,f,ts):
 
   for i in range(f.shape[0]):
       A_d = delta[i] * np.eye(A.shape[0]) - A
-      
+
       [A_d, T_d] = linalg.matrix_balance(A_d)
       B_d = linalg.solve(T_d, B)
       C_d = C @ T_d
-      
+
       h   = linalg.solve(A_d, B_d)
       h   = (C_d @ h) + D
       mag[:,:,i] = np.abs(h)
@@ -92,7 +93,7 @@ def dIIR_scaling(Ad,Bd,T0,f,ts):
     Ts[i,i] = np.prod(k_inv[0:i+1])
 
   return Ts, k_inv
-  
+
 # ----------------------------------------------------------
 def ss_concat_outputs(sys_0, sys_1):
   A = linalg.block_diag(sys_0.A, sys_1.A)
@@ -184,7 +185,7 @@ def dDFIIt_noise_gain(Ad,Bd,Cd,Dd,K_inv,Ts,T0,f,ts):
   [m_sys_x_sd2,phz] = delta_bode(sys_x_sd2.A,sys_x_sd2.B,sys_x_sd2.C,sys_x_sd2.D,f,ts)
   sig_2_x_sd2 = n_sd*(np.squeeze(m_sys_x_sd2)**2)
 
-  # % total SD output noise 
+  # % total SD output noise
   sig_2_nom = np.trapz(np.squeeze(sig_2_sd1),f) + np.trapz(np.squeeze(sig_2_sd2),f)
   sig_2_x_sd = sig_2_x_sd1 + sig_2_x_sd2
 
@@ -215,8 +216,45 @@ def bitwidth_opt(S,p,H,sig2_sd,sig2_x_sd):
   # print(q.value)
   # print("A dual solution corresponding to the inequality constraints is")
   # print(prob.constraints[0].dual_value)
-  
+
   return q
+
+# ----------------------------------------------------------
+def sensitivity_plot(A,B,C,D,f,ts,S_mag,S_phz,q):
+  [m_h,p_h] = delta_bode(A,B,C,D,f,ts)
+  m_h = np.squeeze(m_h)
+  p_h = np.squeeze(p_h)
+  m_h = m_h.reshape((m_h.shape[0],1))
+  p_h = p_h.reshape((p_h.shape[0],1))
+
+  up_m = q.T @ S_mag
+  up_m = m_h + up_m.T
+  low_m = q.T @ S_mag
+  low_m = m_h - low_m.T
+  low_m[low_m<0] = 0
+
+  up_p = q.T @ S_phz
+  up_p = p_h + up_p.T
+  low_p = q.T @ S_phz
+  low_p = p_h - low_p.T
+
+  ax1 = plt.subplot(211)
+  ax1.semilogx(f,20*np.log10(m_h))
+  ax1.semilogx(f,20*np.log10(up_m),'r--')
+  ax1.semilogx(f,20*np.log10(low_m),'g--')
+  ax1.set_xlabel('Frequency');
+  ax1.set_ylabel('Magnitude (dB)');
+  ax1.set_title('Bode Plot');
+  ax1.legend(['Ideal Transfer Function','Upper Deviation Bound','Lower Deviation Bound'], loc='lower left', fontsize='x-small')
+
+  ax2 = plt.subplot(212)
+  ax2.semilogx(f,p_h,f,up_p,'r--')
+  ax2.semilogx(f,low_p,'g--')
+  ax2.set_xlabel('Frequency')
+  ax2.set_ylabel('Phase')
+  ax2.legend(['Ideal Transfer Function','Upper Deviation Bound','Lower Deviation Bound'], loc='lower left', fontsize='x-small')
+
+  plt.show()
 
 # ----------------------------------------------------------
 class sd_filter:
@@ -228,16 +266,16 @@ class sd_filter:
 
   def run(self, A, B, C, D):
     OSR = self.OSR
-    fb  = self.fb 
-    fs  = self.fs 
-    ts  = self.ts 
-  
+    fb  = self.fb
+    fs  = self.fs
+    ts  = self.ts
+
     # ----------------------------------------------------------
     f  = np.logspace(0,np.log10(fb),2**10)
 
     # ----------------------------------------------------------
     [A, T] = linalg.matrix_balance(A)
-    B = linalg.solve(T, B) 
+    B = linalg.solve(T, B)
     C = C @ T
 
     # ----------------------------------------------------------
@@ -263,7 +301,7 @@ class sd_filter:
 
     beta  = num_ts[0]
     alpha = den_ts
-    self.beta  = beta 
+    self.beta  = beta
     self.alpha = alpha
 
     # ----------------------------------------------------------
@@ -281,6 +319,9 @@ class sd_filter:
 
     q = bitwidth_opt(S_mag,p,H,sig_noise,s)
     self.q = q
+
+    # ----------------------------------------------------------
+    sensitivity_plot(Ad,Bd,Cd,Dd,f,ts,S_mag,S_phz,q.value)
 
     # ----------------------------------------------------------
     qs = np.log2(q.value)
@@ -309,4 +350,4 @@ class sd_filter:
       print('beta [', idx, '] |' , bw[0,idx]       , qs[0,idx]    )
       print('k_ts [', idx, '] |' , shift[idx] + 1  , shift[idx]   )
       print('-' * 40)
-      
+

@@ -30,7 +30,7 @@ N = 4
 
 filter = sdf.sd_filter(OSR,fb)
 filter.run(A,B,C,D)
-sd_sim.sim_filter(filter)
+# sd_sim.sim_filter(filter)
 
 # --------------------------------------------------------------------------
 import scipy.io as sio
