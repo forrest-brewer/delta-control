@@ -4,7 +4,7 @@ from scipy import linalg
 import control
 import matplotlib.pyplot as plt
 from IPython.display import Image
-from IPython.display import Math, display
+from IPython.display import Math, display, Latex
 
 import sys
 

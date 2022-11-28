@@ -257,6 +257,69 @@ def sensitivity_plot(A,B,C,D,f,ts,S_mag,S_phz,q):
   plt.show()
 
 # ----------------------------------------------------------
+def mag_states_plot(mag,f,ylabel):
+  for i in range(mag.shape[0]):
+    ax1 = plt.subplot(211)
+    ax1.semilogy(f, mag[i])
+    ax1.set_xlabel('Frequency');
+    ax1.set_ylabel(ylabel + ' ' + str(i) + '\n' + 'Magnitude');
+    # ax1.set_title('Bode Plot');
+    ax1.grid(True)
+    plt.show()
+
+# ----------------------------------------------------------
+def mag_before_after_plot(before,after,f,ylabel, legend=['Before','After']):
+  for i in range(before.shape[0]):
+    ax1 = plt.subplot(211)
+    ax1.semilogy(f, before[i])
+    ax1.semilogy(f, after[i] )
+    ax1.set_xlabel('Frequency');
+    ax1.set_ylabel(ylabel + ' ' + str(i) + '\n' + 'Magnitude');
+    # ax1.set_title('Bode Plot');
+    ax1.legend(legend, loc='lower right', fontsize='x-small')
+    ax1.grid(True)
+    plt.show()
+
+# ----------------------------------------------------------
+def delta_bode_mag_plot(mag,f):
+  plt.semilogx(f,20*np.log10(mag))
+  plt.xlabel('Frequency');
+  plt.ylabel('Magnitude (dB)');
+  plt.title('Bode Plot');
+  plt.grid(True)
+  plt.show()
+
+# ----------------------------------------------------------
+import sympy as sym
+from sympy import latex
+from sympy import init_printing
+init_printing() 
+
+def print_ss_eq(Ad_t,Bd_t,Cd_t,Dd_t):
+
+  n = Ad_t.shape[0]
+  m = Bd_t.shape[1]
+
+  A = sym.Matrix(n, n, Ad_t.flatten())
+  A = sym.sympify(A).evalf(3)
+
+  B = sym.Matrix(n, m, Bd_t.flatten())
+  B = sym.sympify(B).evalf(3)
+
+  C = sym.Matrix(m, n, Cd_t.flatten())
+  C = sym.sympify(C).evalf(3)
+
+  D = sym.Matrix(Dd_t.shape[0], Dd_t.shape[1], Dd_t.flatten())
+  D = sym.sympify(D).evalf(3)
+
+  I = sym.Identity(n)
+  s = sym.symbols('s')
+
+  # print(latex(C*(I-A)**(-1)*B+D) + '\n')
+  ss_eq = latex(C*(I*s-A)**(-1)*B+D)
+  return ss_eq
+
+# ----------------------------------------------------------
 class sd_filter:
   def __init__(self, OSR, fb):
     self.OSR = OSR           # oversample ratio
