@@ -231,7 +231,8 @@ def sensitivity_plot(A,B,C,D,f,ts,S_mag,S_phz,q):
   up_m = m_h + up_m.T
   low_m = q.T @ S_mag
   low_m = m_h - low_m.T
-  low_m[low_m<0] = 0
+  # low_m[low_m<0] = 0
+  low_m[low_m<0] = np.finfo(np.float64).tiny
 
   up_p = q.T @ S_phz
   up_p = p_h + up_p.T
@@ -246,13 +247,14 @@ def sensitivity_plot(A,B,C,D,f,ts,S_mag,S_phz,q):
   ax1.set_ylabel('Magnitude (dB)');
   ax1.set_title('Bode Plot');
   ax1.legend(['Ideal Transfer Function','Upper Deviation Bound','Lower Deviation Bound'], loc='lower left', fontsize='x-small')
+  ax1.set_ylim([-120, 10])
 
-  ax2 = plt.subplot(212)
-  ax2.semilogx(f,p_h,f,up_p,'r--')
-  ax2.semilogx(f,low_p,'g--')
-  ax2.set_xlabel('Frequency')
-  ax2.set_ylabel('Phase')
-  ax2.legend(['Ideal Transfer Function','Upper Deviation Bound','Lower Deviation Bound'], loc='lower left', fontsize='x-small')
+  # ax2 = plt.subplot(212)
+  # ax2.semilogx(f,p_h,f,up_p,'r--')
+  # ax2.semilogx(f,low_p,'g--')
+  # ax2.set_xlabel('Frequency')
+  # ax2.set_ylabel('Phase')
+  # ax2.legend(['Ideal Transfer Function','Upper Deviation Bound','Lower Deviation Bound'], loc='lower left', fontsize='x-small')
 
   plt.show()
 
@@ -268,9 +270,13 @@ def mag_states_plot(mag,f,ylabel):
     plt.show()
 
 # ----------------------------------------------------------
-def mag_before_after_plot(before,after,f,ylabel, legend=['Before','After']):
+def mag_before_after_plot(before,after,f,ylabel, legend=['Before','After'], add_line=None):
   for i in range(before.shape[0]):
     ax1 = plt.subplot(211)
+
+    if add_line is not None:
+      ax1.hlines(y=add_line, colors='green', xmin=f[0], xmax=f[-1], linestyles='dotted')
+
     ax1.semilogy(f, before[i])
     ax1.semilogy(f, after[i] )
     ax1.set_xlabel('Frequency');
@@ -293,7 +299,7 @@ def delta_bode_mag_plot(mag,f):
 import sympy as sym
 from sympy import latex
 from sympy import init_printing
-init_printing() 
+init_printing()
 
 def print_ss_eq(Ad_t,Bd_t,Cd_t,Dd_t):
 
