@@ -4,8 +4,7 @@ from scipy import linalg
 import control
 import matplotlib.pyplot as plt
 from IPython.display import Image
-from IPython.display import Math, display, Latex
-
+from IPython.display import Math, display, Latex, Markdown
 import sys
 
 if '../sdfpy' not in sys.path:

@@ -82,8 +82,9 @@ def sim_filter(filter):
   t = np.arange(0, 0.5, 1.0/fs)
   ds_in = 0.5*signal.chirp(t,0,0.25,fb/2);
 
-  print('np.amin(ds_in)', np.amin(ds_in))
-  print('np.amax(ds_in)', np.amax(ds_in))
+  # print('np.amin(ds_in)', np.amin(ds_in))
+  # print('np.amax(ds_in)', np.amax(ds_in))
+  print('\n\n The floating point simulation will take several minutes to run.')
 
   # ----------------------------------------------------------
   ds_mod = sigma_delta()

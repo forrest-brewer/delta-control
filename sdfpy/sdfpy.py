@@ -262,7 +262,7 @@ def sensitivity_plot(A,B,C,D,f,ts,S_mag,S_phz,q):
 def mag_states_plot(mag,f,ylabel):
   for i in range(mag.shape[0]):
     ax1 = plt.subplot(211)
-    ax1.semilogy(f, mag[i])
+    ax1.loglog(f, mag[i])
     ax1.set_xlabel('Frequency');
     ax1.set_ylabel(ylabel + ' ' + str(i) + '\n' + 'Magnitude');
     # ax1.set_title('Bode Plot');
@@ -277,8 +277,8 @@ def mag_before_after_plot(before,after,f,ylabel, legend=['Before','After'], add_
     if add_line is not None:
       ax1.hlines(y=add_line, colors='green', xmin=f[0], xmax=f[-1], linestyles='dotted')
 
-    ax1.semilogy(f, before[i])
-    ax1.semilogy(f, after[i] )
+    ax1.loglog(f, before[i])
+    ax1.loglog(f, after[i] )
     ax1.set_xlabel('Frequency');
     ax1.set_ylabel(ylabel + ' ' + str(i) + '\n' + 'Magnitude');
     # ax1.set_title('Bode Plot');
@@ -294,6 +294,27 @@ def delta_bode_mag_plot(mag,f):
   plt.title('Bode Plot');
   plt.grid(True)
   plt.show()
+
+# ----------------------------------------------------------
+def print_fp_coefficients(bw_accum,bw,b_frac,qs,shift):
+  s_bw_accum = np.squeeze(bw_accum)
+  s_bw       = np.squeeze(bw      )
+  s_b_frac   = np.squeeze(b_frac  )
+  s_qs       = np.squeeze(qs      )
+
+  s = '''
+  ### Optimal signed fixed point representations of the coefficients
+  |$i$|$\\alpha_{i}$ and $\\beta_{i}$|Accumulator|$k_{i}$ * $\\Delta$|
+  |----------------|----------------|----------------|----------------|
+  '''
+
+  for i in range(shift.shape[0]):
+    s += '| '  + str(i)
+    s += '| Q' + str(int(s_bw[i] - s_qs[i] - 1))           + '.' + str(int(s_qs[i]    ))
+    s += '| Q' + str(int(s_bw_accum[i] - s_b_frac[i] - 1)) + '.' + str(int(s_b_frac[i]))
+    s += '| Q' + str(0)                                    + '.' + str(int(shift[i] )) + '|\n'
+
+  return s
 
 # ----------------------------------------------------------
 import sympy as sym
@@ -341,6 +362,7 @@ class sd_filter:
 
     # ----------------------------------------------------------
     f  = np.logspace(0,np.log10(fb),2**10)
+    self.f = f
 
     # ----------------------------------------------------------
     [A, T] = linalg.matrix_balance(A)
@@ -350,6 +372,7 @@ class sd_filter:
     # ----------------------------------------------------------
     # Converting from Continuous Time to Sampled Time
     [Ad,Bd,Cd,Dd] = c2delta(A,B,C,D,ts)
+    [self.Ad,self.Bd,self.Cd,self.Dd] = [Ad,Bd,Cd,Dd]
 
     # ----------------------------------------------------------
     # Structural Transformation of Filter
@@ -370,10 +393,18 @@ class sd_filter:
 
     beta  = num_ts[0]
     alpha = den_ts
+    
+    self.T0    = T0
+    self.Ts    = Ts
+    self.K_inv = K_inv
     self.beta  = beta
     self.alpha = alpha
 
+  def optimize(self):
     # ----------------------------------------------------------
+    [Ad,Bd,Cd,Dd] = [self.Ad,self.Bd,self.Cd,self.Dd]
+    [K_inv,T0,Ts,f,ts] = [self.K_inv,self.T0,self.Ts,self.f,self.ts]
+    
     # % Calculation of sensitivity matrix
     [S_mag, S_phz] = SD_dIIR_sensitivity(Ad,Bd,Cd,Dd,T0,Ts,f,ts)
 
@@ -383,7 +414,7 @@ class sd_filter:
     SNR = 90
     sig_noise = 10**(-(SNR/10))
     p = .1*np.ones((1,S_mag.shape[1]))
-    s = np.sqrt(np.trapz(sig_2_x_sd)*(12*OSR));
+    s = np.sqrt(np.trapz(sig_2_x_sd)*(12*self.OSR));
     S_mag = np.squeeze(S_mag)
 
     q = bitwidth_opt(S_mag,p,H,sig_noise,s)
@@ -393,6 +424,9 @@ class sd_filter:
     sensitivity_plot(Ad,Bd,Cd,Dd,f,ts,S_mag,S_phz,q.value)
 
     # ----------------------------------------------------------
+    beta  = self.beta
+    alpha = self.alpha
+    k     = self.k
     qs = np.log2(q.value)
     qs[qs>0] = 0
     qs = np.ceil(np.abs(qs)).T
