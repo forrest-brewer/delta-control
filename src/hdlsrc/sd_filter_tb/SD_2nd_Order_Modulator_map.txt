@@ -1,0 +1,19 @@
+sd_filter_tb/SD 2nd Order Modulator/SD 2nd Order Modulator/SD_Mux --> SD_Mux
+sd_filter_tb/SD 2nd Order Modulator/SD 2nd Order Modulator --> SD_2nd_Order_Modulator_block
+sd_filter_tb/SD 2nd Order Modulator/SD 2nd Order Modulator1/SD_Mux --> SD_Mux_block
+sd_filter_tb/SD 2nd Order Modulator/SD 2nd Order Modulator1 --> SD_2nd_Order_Modulator1
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/SD_Mux8 --> SD_Mux8
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_2/SD_Mux1 --> SD_Mux1
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_2/SD_Mux5 --> SD_Mux5
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_2 --> node_2
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_3/SD_Mux1 --> SD_Mux1_block
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_3/SD_Mux5 --> SD_Mux5_block
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_3 --> node_3
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_4/SD_Mux1 --> SD_Mux1_block1
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_4/SD_Mux5 --> SD_Mux5_block1
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_4 --> node_4
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_5/SD_Mux1 --> SD_Mux1_block2
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_5/SD_Mux5 --> SD_Mux5_block2
+sd_filter_tb/SD 2nd Order Modulator/SD Filter/node_5 --> node_5
+sd_filter_tb/SD 2nd Order Modulator/SD Filter --> SD_Filter
+sd_filter_tb/SD 2nd Order Modulator --> SD_2nd_Order_Modulator
