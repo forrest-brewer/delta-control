@@ -13,7 +13,7 @@ fs = fb*2
 fs_to_ds = fs*OSR # sampling rate
 
 # ----------------------------------------------------------
-t = np.arange(0, 0.1, 1.0/fs_to_ds)
+t = np.arange(0, 1.0, 1.0/fs_to_ds)
 u = np.random.rand(t.shape[0])
 u -= 0.5
 u *= 2.0

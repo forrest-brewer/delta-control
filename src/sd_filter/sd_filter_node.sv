@@ -90,7 +90,7 @@ module sd_filter_node #(real ALPHA, real BETA, sd_filter_cfg_t CFG)
     alpha_mux_i(feedback, alpha);
 
   // -------------------------------------------------------------
-  wire signed [W:0] k_ts_sum = k_ts_node + beta - alpha;  // grow by 1 bit for addtion
+  wire signed [W:0] k_ts_sum = k_ts_node + beta - alpha;  // grow by 1 bit for addition
   reg  signed [OUT_W-1:0] z;
   wire signed [OUT_W-1:0] acc_sum = z + {{(OUT_W - W - 1){k_ts_sum[W]}}, k_ts_sum};
 

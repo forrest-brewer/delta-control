@@ -20,17 +20,10 @@ global env
 
 set env(ROOT_DIR) ../../../..
 set env(PROJECT_DIR) ../../..
+set env(TB_BASE_DIR) "$env(ROOT_DIR)/tb_base"
 
-set env(TB_BASE_DIR) "$env(PROJECT_DIR)/tb_base"
 dict set lib_tb_base name "tb_base"
 dict set lib_tb_base dir $env(TB_BASE_DIR)
 set env(LIB_TB_BASE) $lib_tb_base
 
-# set env(AXI4_LIB_DIR) "$env(ROOT_DIR)/AXI4_LIB"
-# dict set lib_axi4_lib name "AXI4_LIB"
-# dict set lib_axi4_lib dir $env(AXI4_LIB_DIR)
-# set env(LIB_AXI4_LIB) $lib_axi4_lib
-
-
-# do $env(LIB_BASE_DIR)/scripts/sim_procs.do
 do $env(TB_BASE_DIR)/scripts/sim_procs.do

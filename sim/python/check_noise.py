@@ -13,7 +13,7 @@ fs = fb*2
 fs_to_ds = fs*OSR # sampling rate
 
 # ----------------------------------------------------------
-t = np.arange(0, 0.1, 1.0/fs_to_ds)
+t = np.arange(0, 1.0, 1.0/fs_to_ds)
 
 # ----------------------------------------------------------
 tx_signal = np.zeros(t.shape)

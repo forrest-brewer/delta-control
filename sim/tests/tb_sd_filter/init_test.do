@@ -26,6 +26,7 @@ radix -hexadecimal
 make_lib work "rebuild"
 
 sim_compile_lib $env(LIB_TB_BASE)
+vmap tb_base ../../../tb_base/sim/libs/tb_base
 
 vlog -f ./files.f
 
