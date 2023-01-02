@@ -21,6 +21,8 @@ Python code used in $\Sigma\Delta$ Stream Computation
 
 ### sim
 SystemVerilog simulation files
+- [Test Bench](https://github.com/forrest-brewer/delta-control/blob/main/sim/tests/tb_simulink) for the Simulink generated Verilog files
+- [Test Bench](https://github.com/forrest-brewer/delta-control/blob/main/sim/tests/tb_sd_filter) for the Synthesizable and parameterizable SystemVeriog code
 
 ### src
 Synthesizable SystemVerilog implementations
